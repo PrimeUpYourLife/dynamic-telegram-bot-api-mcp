@@ -16,17 +16,44 @@ The checked-in catalog currently targets Telegram Bot API 10.2 and contains ever
 
 There is deliberately no generated tool per Bot API method. The catalog and generic call tool are the API surface.
 
-## Requirements and setup
+## Requirements and installation
 
 - Node.js 20.18.1 or later
 - A bot token from [@BotFather](https://t.me/BotFather) for API calls (catalog tools work without one)
 
+### Install from npm
+
+Run the published [npm package](https://www.npmjs.com/package/dynamic-telegram-bot-api-mcp) directly with `npx`—no repository checkout or build is required:
+
+```json
+{
+  "mcpServers": {
+    "telegram": {
+      "command": "npx",
+      "args": ["-y", "dynamic-telegram-bot-api-mcp"],
+      "env": {
+        "TELEGRAM_BOT_TOKEN": "YOUR_BOT_TOKEN",
+        "TELEGRAM_METHOD_ALLOWLIST": "get*,sendMessage,sendPhoto"
+      }
+    }
+  }
+}
+```
+
+Alternatively, install it globally with `npm install -g dynamic-telegram-bot-api-mcp` and use `"command": "telegram-bot-api-mcp"` in the configuration above, omitting `args`.
+
+### Install from GitHub
+
+Clone and build the [GitHub repository](https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp):
+
 ```bash
-npm install
+git clone https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp.git
+cd dynamic-telegram-bot-api-mcp
+npm ci
 npm run build
 ```
 
-Configure an MCP client to start the built stdio server. Use an absolute repository path:
+Then configure an MCP client to start the built stdio server. Use an absolute repository path:
 
 ```json
 {
@@ -43,7 +70,7 @@ Configure an MCP client to start the built stdio server. Use an absolute reposit
 }
 ```
 
-For local development, run `npm run dev`. Never commit the token; `.env` is ignored, but environment files are not loaded automatically.
+For local development from the GitHub checkout, run `npm run dev`. Never commit the token; `.env` is ignored, but environment files are not loaded automatically.
 
 ## Tool examples
 
