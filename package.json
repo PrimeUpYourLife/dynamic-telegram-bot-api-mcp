@@ -2,6 +2,10 @@
   "name": "dynamic-telegram-bot-api-mcp",
   "version": "1.0.0",
   "description": "A dynamic, self-refreshing MCP gateway for the complete Telegram Bot API",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp.git"
+  },
   "type": "module",
   "bin": {
     "telegram-bot-api-mcp": "dist/index.js"
