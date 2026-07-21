@@ -194,7 +194,7 @@ The daily GitHub Actions workflow refreshes the catalog, tests and builds the pr
 
 Publishing a GitHub release triggers `.github/workflows/publish-npm.yml`. The workflow checks that the release tag is the package version (for example, `v1.1.0` for version `1.1.0`), runs the type-check, test, and build commands, then publishes to npm with provenance. Normal releases use the `latest` npm tag and GitHub prereleases use `next`.
 
-For the initial publication, add a read/write granular npm access token that bypasses 2FA as the `NPM_TOKEN` GitHub Actions repository secret. After the package exists on npm, configure npm trusted publishing for this repository and the `publish-npm.yml` workflow; the workflow's OIDC permission then allows token-free publishing, and the secret can be removed. Update the version in both `package.json` and `package-lock.json` before creating the matching GitHub release.
+Configure npm trusted publishing for this repository and the `publish-npm.yml` workflow before creating a release. Allow the trusted publisher to run `npm publish`; leave its environment name empty because the workflow does not use a GitHub environment. The workflow deliberately omits `NODE_AUTH_TOKEN` so npm uses the short-lived OIDC credential granted by its `id-token: write` permission. If the package does not exist on npm yet, create it with a one-time manual publication using secure npm authentication, then configure trusted publishing for subsequent releases. Update the version in both `package.json` and `package-lock.json` before creating the matching GitHub release.
 
 ## Architecture
 

@@ -55,6 +55,5 @@ jobs:
 
       - name: Publish package
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_DIST_TAG: ${{ steps.release.outputs.dist_tag }}
         run: npm publish --access public --provenance --tag "$NPM_DIST_TAG"
