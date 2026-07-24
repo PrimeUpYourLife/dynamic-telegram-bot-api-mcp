@@ -1,3 +1,5 @@
+<img width="1320" height="794" alt="image" src="https://github.com/user-attachments/assets/ed2b38bc-6160-4288-a7c5-1f09f5f9bb6f" />
+
 # Dynamic Telegram Bot API MCP Server
 
 A production-oriented [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes the complete Telegram Bot API through five stable tools. It parses Telegram's official documentation into a normalized local catalog, so new Bot API methods and objects become available after a schema refresh without source-code changes.
