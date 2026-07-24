@@ -1,6 +1,15 @@
-<img width="1320" height="794" alt="image" src="https://github.com/user-attachments/assets/ed2b38bc-6160-4288-a7c5-1f09f5f9bb6f" />
+<p align="center">
+  <img width="640" alt="Dynamic Telegram Bot API MCP Server" src="https://github.com/user-attachments/assets/ed2b38bc-6160-4288-a7c5-1f09f5f9bb6f" />
+</p>
 
 # Dynamic Telegram Bot API MCP Server
+
+<p align="center">
+  <a href="https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp/actions/workflows/refresh-schema.yml"><img alt="Refresh Telegram Bot API schema" src="https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp/actions/workflows/refresh-schema.yml/badge.svg" /></a>
+  <a href="https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/PrimeUpYourLife/dynamic-telegram-bot-api-mcp?logo=github" /></a>
+  <a href="https://www.npmjs.com/package/dynamic-telegram-bot-api-mcp"><img alt="npm version" src="https://img.shields.io/npm/v/dynamic-telegram-bot-api-mcp?logo=npm" /></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/PrimeUpYourLife/dynamic-telegram-bot-api-mcp" /></a>
+</p>
 
 A production-oriented [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes the complete Telegram Bot API through five stable tools. It parses Telegram's official documentation into a normalized local catalog, so new Bot API methods and objects become available after a schema refresh without source-code changes.
 
