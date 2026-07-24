@@ -1,4 +1,6 @@
+import { readFileSync } from "node:fs";
 import { delimiter, resolve } from "node:path";
+import { parseEnv } from "node:util";
 import { z } from "zod";
 import type { LogLevel } from "./logger.js";
 
@@ -36,13 +38,26 @@ export interface AppConfig {
   logLevel: LogLevel;
 }
 
-export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppConfig {
-  const value = environmentSchema.parse(environment);
-  const localFileRoots = (value.TELEGRAM_LOCAL_FILE_ROOTS ?? process.cwd())
+function loadProjectEnvironment(workingDirectory: string, environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  let projectEnvironment: NodeJS.ProcessEnv = {};
+  try {
+    projectEnvironment = parseEnv(readFileSync(resolve(workingDirectory, ".env"), "utf8"));
+  } catch (error: unknown) {
+    if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
+  }
+  return { ...projectEnvironment, ...environment };
+}
+
+export function loadConfig(
+  environment: NodeJS.ProcessEnv = process.env,
+  workingDirectory: string = process.cwd(),
+): AppConfig {
+  const value = environmentSchema.parse(loadProjectEnvironment(workingDirectory, environment));
+  const localFileRoots = (value.TELEGRAM_LOCAL_FILE_ROOTS ?? workingDirectory)
     .split(delimiter)
     .map((entry) => entry.trim())
     .filter(Boolean)
-    .map((entry) => resolve(entry));
+    .map((entry) => resolve(workingDirectory, entry));
   const config: AppConfig = {
     apiBaseUrl: value.TELEGRAM_API_BASE_URL.replace(/\/$/, ""),
     methodAllowlist: (value.TELEGRAM_METHOD_ALLOWLIST ?? "*").split(",").map((item) => item.trim()).filter(Boolean),
@@ -57,6 +72,6 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
     logLevel: value.LOG_LEVEL,
   };
   if (value.TELEGRAM_BOT_TOKEN) config.token = value.TELEGRAM_BOT_TOKEN;
-  if (value.TELEGRAM_SCHEMA_PATH) config.schemaPath = resolve(value.TELEGRAM_SCHEMA_PATH);
+  if (value.TELEGRAM_SCHEMA_PATH) config.schemaPath = resolve(workingDirectory, value.TELEGRAM_SCHEMA_PATH);
   return config;
 }

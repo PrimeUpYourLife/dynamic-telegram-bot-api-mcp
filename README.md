@@ -36,16 +36,22 @@ There is deliberately no generated tool per Bot API method. The catalog and gene
 
 Run the published [npm package](https://www.npmjs.com/package/dynamic-telegram-bot-api-mcp) directly with `npx`—no repository checkout or build is required:
 
+Create a `.env` in each project with that project's bot token:
+
+```dotenv
+TELEGRAM_BOT_TOKEN=YOUR_PROJECT_BOT_TOKEN
+TELEGRAM_METHOD_ALLOWLIST=get*,sendMessage,sendPhoto
+```
+
+Then set the MCP server's working directory to the project root:
+
 ```json
 {
   "mcpServers": {
     "telegram": {
       "command": "npx",
       "args": ["-y", "dynamic-telegram-bot-api-mcp"],
-      "env": {
-        "TELEGRAM_BOT_TOKEN": "YOUR_BOT_TOKEN",
-        "TELEGRAM_METHOD_ALLOWLIST": "get*,sendMessage,sendPhoto"
-      }
+      "cwd": "/absolute/path/to/project"
     }
   }
 }
@@ -72,16 +78,15 @@ Then configure an MCP client to start the built stdio server. Use an absolute re
     "telegram": {
       "command": "node",
       "args": ["/absolute/path/dynamic-telegram-bot-api-mcp/dist/index.js"],
-      "env": {
-        "TELEGRAM_BOT_TOKEN": "YOUR_BOT_TOKEN",
-        "TELEGRAM_METHOD_ALLOWLIST": "get*,sendMessage,sendPhoto"
-      }
+      "cwd": "/absolute/path/to/project"
     }
   }
 }
 ```
 
-For local development from the GitHub checkout, run `npm run dev`. Never commit the token; `.env` is ignored, but environment files are not loaded automatically.
+At startup, the server loads `.env` from its current working directory. This lets the same MCP server configuration use a different token for each project. It does not search parent directories; set `cwd` explicitly if the MCP client does not launch the server from the project root. Variables supplied by the MCP client or exported in the process environment take precedence over `.env`.
+
+For local development from the GitHub checkout, run `npm run dev`; the checkout's `.env` is loaded automatically. Never commit a token.
 
 ## Tool examples
 
@@ -145,7 +150,7 @@ Descriptors also work inside nested media objects. For fields documented with `a
 
 | Environment variable | Default | Meaning |
 | --- | --- | --- |
-| `TELEGRAM_BOT_TOKEN` | unset | Bot token; required only by `telegram_call_method` |
+| `TELEGRAM_BOT_TOKEN` | unset | Bot token loaded from the process environment or current project `.env`; required only by `telegram_call_method` |
 | `TELEGRAM_API_BASE_URL` | `https://api.telegram.org` | API origin, including for a local Bot API server |
 | `TELEGRAM_METHOD_ALLOWLIST` | `*` | Comma-separated exact names or `*` glob patterns |
 | `TELEGRAM_REQUEST_TIMEOUT_MS` | `30000` | Per-attempt timeout |
@@ -180,7 +185,7 @@ Telegram error codes, descriptions, and response parameters such as `retry_after
 
 ## Security model
 
-- The bot token is read only from the environment. It is never included in tool output or audit fields, and defensive redaction is applied to Telegram descriptions.
+- The bot token is read only from the process environment or the current project `.env`. It is never included in tool output or audit fields, and defensive redaction is applied to Telegram descriptions.
 - Audit records are JSON lines on stderr and contain method name, parameter names, timing, retry count, and status—not parameter values.
 - Destructive method families (for example `delete*`, `ban*`, `revoke*`, `refund*`, and `stop*`) require `confirm: true`.
 - `TELEGRAM_METHOD_ALLOWLIST` can limit methods available to the call tool. Prefer a narrow production allowlist.
@@ -211,6 +216,7 @@ Configure npm trusted publishing for this repository and the `publish-npm.yml` w
 
 ```text
 src/
+  config.ts                process and project-local .env configuration
   index.ts                 stdio entrypoint and startup refresh
   server.ts                MCP server composition
   telegram-client.ts       HTTP, timeout, retry, error, and audit behavior

@@ -8,6 +8,7 @@ This project is a Node.js 20+ Model Context Protocol server written in strict Ty
 
 Key locations:
 
+- `src/config.ts`: process environment and current-project `.env` loading, validation, and path resolution.
 - `src/index.ts`: stdio entrypoint and startup schema refresh.
 - `src/server.ts`: MCP server composition and tool registration.
 - `src/tools/`: implementations of the five public MCP tools.
