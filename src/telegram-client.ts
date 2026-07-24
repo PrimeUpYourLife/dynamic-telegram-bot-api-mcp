@@ -94,7 +94,10 @@ export class TelegramClient {
     for (const [key, value] of Object.entries(parameters)) {
       form.append(key, typeof value === "object" && value !== null ? JSON.stringify(value) : String(value));
     }
-    for (const upload of uploads) form.append(upload.name, new Blob([upload.data], { type: upload.contentType }), upload.filename);
+    for (const upload of uploads) {
+      const data = Uint8Array.from(upload.data);
+      form.append(upload.name, new Blob([data], { type: upload.contentType }), upload.filename);
+    }
     return { body: form };
   }
 

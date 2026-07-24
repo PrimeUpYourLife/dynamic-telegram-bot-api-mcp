@@ -135,9 +135,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# agents
-AGENTS.md
-CLAUDE.md
-
 # others
 .DS_Store

@@ -139,7 +139,7 @@ For an explicit local upload descriptor or in-memory binary payload:
 { "base64": "iVBORw0KGgo...", "filename": "photo.png", "contentType": "image/png" }
 ```
 
-Descriptors also work inside nested media objects. For fields documented with `attach://`, local paths are replaced with attachment references and the request is sent as `multipart/form-data`. Paths are resolved through `realpath`, restricted to configured roots, required to be regular files, and size-limited.
+Descriptors also work inside nested media objects. For fields documented with `attach://`, local paths are replaced with attachment references and the request is sent as `multipart/form-data`. Upload bytes are normalized to an `ArrayBuffer`-backed copy before constructing each multipart file. Paths are resolved through `realpath`, restricted to configured roots, required to be regular files, and size-limited.
 
 ## Configuration
 
