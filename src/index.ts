@@ -2,10 +2,10 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { loadConfig } from "./config.js";
 import { Logger } from "./logger.js";
-import { RateLimiter } from "./rate-limiter.js";
+import { ProjectContextResolver } from "./project-context.js";
 import { SchemaStore, defaultSchemaPath } from "./schema-store.js";
 import { createServer } from "./server.js";
-import { TelegramClient } from "./telegram-client.js";
+import type { ToolContext } from "./tools/context.js";
 
 async function main(): Promise<void> {
   const config = loadConfig();
@@ -16,18 +16,15 @@ async function main(): Promise<void> {
   if (initialized.refreshed) {
     logger.info("telegram_schema_refreshed", { version: initialized.schema.version, methods: initialized.schema.methods.length, types: initialized.schema.types.length });
   }
-  const client = config.token ? new TelegramClient({
-    token: config.token,
-    baseUrl: config.apiBaseUrl,
-    timeoutMs: config.requestTimeoutMs,
-    retries: config.requestRetries,
-    limiter: new RateLimiter(config.rateLimitPerSecond, config.rateLimitBurst),
-    logger,
-  }) : undefined;
-  if (!client) logger.warn("telegram_bot_token_missing_call_tool_disabled");
-
-  const context = { config, logger, store, ...(client ? { client } : {}) };
+  const context: ToolContext = { config, logger, store };
   const server = createServer(context);
+  const projectContextResolver = new ProjectContextResolver({
+    rootProvider: server.server,
+    fallbackConfig: config,
+    environment: process.env,
+    logger,
+  });
+  context.resolveProjectContext = () => projectContextResolver.resolve();
   const transport = new StdioServerTransport();
   await server.connect(transport);
   logger.info("mcp_server_started", { transport: "stdio", schemaVersion: initialized.schema.version });

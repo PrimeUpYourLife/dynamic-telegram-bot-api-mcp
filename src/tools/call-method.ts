@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { ProjectContextError } from "../project-context.js";
 import { TelegramApiError } from "../telegram-client.js";
 import { UploadProcessor } from "../uploads.js";
 import { ParameterValidationError, validateMethodParameters } from "../validation.js";
@@ -28,22 +29,38 @@ export function registerCallMethod(server: McpServer, context: ToolContext): voi
   }, async ({ method: requestedMethod, parameters, confirm }) => {
     const method = context.store.getMethod(requestedMethod);
     if (!method) return errorResult("METHOD_NOT_FOUND", `Unknown Telegram Bot API method: ${requestedMethod}`);
-    if (!allowed(method.name, context.config.methodAllowlist)) {
-      return errorResult("METHOD_NOT_ALLOWED", `${method.name} is not permitted by TELEGRAM_METHOD_ALLOWLIST`);
-    }
-    if (destructiveMethod.test(method.name) && !confirm) {
-      return errorResult("CONFIRMATION_REQUIRED", `${method.name} is destructive; repeat the call with confirm=true`);
-    }
-    if (!context.client) return errorResult("BOT_TOKEN_MISSING", "Set TELEGRAM_BOT_TOKEN before calling Telegram methods");
 
     try {
-      const validation = validateMethodParameters(method, parameters, context.store, context.config.allowUnknownParameters);
+      const projectContext = context.resolveProjectContext
+        ? await context.resolveProjectContext()
+        : { config: context.config, ...(context.client ? { client: context.client } : {}) };
+      if (!allowed(method.name, projectContext.config.methodAllowlist)) {
+        return errorResult("METHOD_NOT_ALLOWED", `${method.name} is not permitted by TELEGRAM_METHOD_ALLOWLIST`);
+      }
+      if (destructiveMethod.test(method.name) && !confirm) {
+        return errorResult("CONFIRMATION_REQUIRED", `${method.name} is destructive; repeat the call with confirm=true`);
+      }
+      if (!projectContext.client) {
+        return errorResult(
+          "BOT_TOKEN_MISSING",
+          "Set TELEGRAM_BOT_TOKEN in the active project's .env or in the server environment",
+        );
+      }
+
+      const validation = validateMethodParameters(method, parameters, context.store, projectContext.config.allowUnknownParameters);
       if (!validation.valid) throw new ParameterValidationError(validation.issues);
-      const prepared = await new UploadProcessor(context.store, context.config.localFileRoots, context.config.maxUploadBytes)
+      const prepared = await new UploadProcessor(
+        context.store,
+        projectContext.config.localFileRoots,
+        projectContext.config.maxUploadBytes,
+      )
         .prepare(parameters, method.parameters);
-      const response = await context.client.call(method.name, prepared.parameters, prepared.uploads);
+      const response = await projectContext.client.call(method.name, prepared.parameters, prepared.uploads);
       return toolResult(response as unknown as Record<string, unknown>);
     } catch (error) {
+      if (error instanceof ProjectContextError) {
+        return errorResult(error.code, error.message);
+      }
       if (error instanceof ParameterValidationError) {
         return errorResult("VALIDATION_ERROR", error.message, { issues: error.issues });
       }

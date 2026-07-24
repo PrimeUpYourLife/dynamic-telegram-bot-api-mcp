@@ -1,5 +1,6 @@
 import type { AppConfig } from "../config.js";
 import type { Logger } from "../logger.js";
+import type { ResolvedProjectContext } from "../project-context.js";
 import type { SchemaStore } from "../schema-store.js";
 import type { TelegramClient } from "../telegram-client.js";
 
@@ -8,6 +9,7 @@ export interface ToolContext {
   logger: Logger;
   store: SchemaStore;
   client?: TelegramClient;
+  resolveProjectContext?: () => Promise<ResolvedProjectContext>;
 }
 
 export function toolResult(value: Record<string, unknown>, isError = false) {

@@ -10,6 +10,7 @@ Key locations:
 
 - `src/config.ts`: process environment and current-project `.env` loading, validation, and path resolution.
 - `src/index.ts`: stdio entrypoint and startup schema refresh.
+- `src/project-context.ts`: MCP roots resolution, per-project configuration precedence, and Telegram client caching.
 - `src/server.ts`: MCP server composition and tool registration.
 - `src/tools/`: implementations of the five public MCP tools.
 - `src/telegram-client.ts`: Telegram HTTP calls, retries, errors, auditing, and `ArrayBuffer`-backed multipart file construction.
@@ -63,6 +64,7 @@ Documentation-only changes do not require a new test, but must still be checked 
 - Validate external and schema-derived data at boundaries. Fail closed when no valid schema is available.
 - Keep MCP errors structured and actionable. Do not expose raw response bodies, stack traces, secrets, tokens, or parameter values in errors or audit logs.
 - Preserve method allowlisting, destructive-method confirmation, retry, timeout, rate-limit, and upload-root protections when changing request behavior.
+- Resolve project-specific Telegram configuration only from a single local MCP workspace root. Never guess between multiple roots or silently fall back after a roots request fails.
 - Keep network behavior deterministic in tests. Mock HTTP calls and use temporary directories or fixtures for file operations; tests must not call the live Telegram API.
 - Avoid unrelated refactors, generated build output, or dependency changes in focused fixes.
 - Never edit `dist/` or other ignored build artifacts by hand.

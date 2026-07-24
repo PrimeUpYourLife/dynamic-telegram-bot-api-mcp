@@ -38,21 +38,18 @@ export interface AppConfig {
   logLevel: LogLevel;
 }
 
-function loadProjectEnvironment(workingDirectory: string, environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+function readProjectEnvironment(workingDirectory: string): NodeJS.ProcessEnv {
   let projectEnvironment: NodeJS.ProcessEnv = {};
   try {
     projectEnvironment = parseEnv(readFileSync(resolve(workingDirectory, ".env"), "utf8"));
   } catch (error: unknown) {
     if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
   }
-  return { ...projectEnvironment, ...environment };
+  return projectEnvironment;
 }
 
-export function loadConfig(
-  environment: NodeJS.ProcessEnv = process.env,
-  workingDirectory: string = process.cwd(),
-): AppConfig {
-  const value = environmentSchema.parse(loadProjectEnvironment(workingDirectory, environment));
+function parseConfig(environment: NodeJS.ProcessEnv, workingDirectory: string): AppConfig {
+  const value = environmentSchema.parse(environment);
   const localFileRoots = (value.TELEGRAM_LOCAL_FILE_ROOTS ?? workingDirectory)
     .split(delimiter)
     .map((entry) => entry.trim())
@@ -74,4 +71,18 @@ export function loadConfig(
   if (value.TELEGRAM_BOT_TOKEN) config.token = value.TELEGRAM_BOT_TOKEN;
   if (value.TELEGRAM_SCHEMA_PATH) config.schemaPath = resolve(workingDirectory, value.TELEGRAM_SCHEMA_PATH);
   return config;
+}
+
+export function loadConfig(
+  environment: NodeJS.ProcessEnv = process.env,
+  workingDirectory: string = process.cwd(),
+): AppConfig {
+  return parseConfig({ ...readProjectEnvironment(workingDirectory), ...environment }, workingDirectory);
+}
+
+export function loadProjectConfig(
+  environment: NodeJS.ProcessEnv,
+  projectDirectory: string,
+): AppConfig {
+  return parseConfig({ ...environment, ...readProjectEnvironment(projectDirectory) }, projectDirectory);
 }

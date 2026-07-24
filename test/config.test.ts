@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { loadConfig } from "../src/config.js";
+import { loadConfig, loadProjectConfig } from "../src/config.js";
 
 const temporaryDirectories: string[] = [];
 
@@ -61,5 +61,21 @@ describe("loadConfig", () => {
     const projectDirectory = await createProjectEnvironment("TELEGRAM_REQUEST_RETRIES=11\n");
 
     expect(() => loadConfig({}, projectDirectory)).toThrow();
+  });
+
+  it("lets project configuration override shared process defaults", async () => {
+    const projectDirectory = await createProjectEnvironment([
+      "TELEGRAM_BOT_TOKEN=project-token",
+      "TELEGRAM_METHOD_ALLOWLIST=getMe,sendMessage",
+      "",
+    ].join("\n"));
+
+    const config = loadProjectConfig({
+      TELEGRAM_BOT_TOKEN: "shared-token",
+      TELEGRAM_METHOD_ALLOWLIST: "getMe",
+    }, projectDirectory);
+
+    expect(config.token).toBe("project-token");
+    expect(config.methodAllowlist).toEqual(["getMe", "sendMessage"]);
   });
 });

@@ -36,25 +36,32 @@ There is deliberately no generated tool per Bot API method. The catalog and gene
 
 Run the published [npm package](https://www.npmjs.com/package/dynamic-telegram-bot-api-mcp) directly with `npx`—no repository checkout or build is required:
 
-Create a `.env` in each project with that project's bot token:
+Create a `.env` in each project or repository with that project's bot token:
 
 ```dotenv
 TELEGRAM_BOT_TOKEN=YOUR_PROJECT_BOT_TOKEN
 TELEGRAM_METHOD_ALLOWLIST=get*,sendMessage,sendPhoto
 ```
 
-Then set the MCP server's working directory to the project root:
+Configure the MCP server once, without a shared token or hard-coded working directory:
 
 ```json
 {
   "mcpServers": {
     "telegram": {
       "command": "npx",
-      "args": ["-y", "dynamic-telegram-bot-api-mcp"],
-      "cwd": "/absolute/path/to/project"
+      "args": ["-y", "dynamic-telegram-bot-api-mcp"]
     }
   }
 }
+```
+
+For Codex, the equivalent `~/.codex/config.toml` entry is:
+
+```toml
+[mcp_servers.telegram]
+command = "npx"
+args = ["-y", "dynamic-telegram-bot-api-mcp"]
 ```
 
 Alternatively, install it globally with `npm install -g dynamic-telegram-bot-api-mcp` and use `"command": "telegram-bot-api-mcp"` in the configuration above, omitting `args`.
@@ -77,16 +84,17 @@ Then configure an MCP client to start the built stdio server. Use an absolute re
   "mcpServers": {
     "telegram": {
       "command": "node",
-      "args": ["/absolute/path/dynamic-telegram-bot-api-mcp/dist/index.js"],
-      "cwd": "/absolute/path/to/project"
+      "args": ["/absolute/path/dynamic-telegram-bot-api-mcp/dist/index.js"]
     }
   }
 }
 ```
 
-At startup, the server loads `.env` from its current working directory. This lets the same MCP server configuration use a different token for each project. It does not search parent directories; set `cwd` explicitly if the MCP client does not launch the server from the project root. Variables supplied by the MCP client or exported in the process environment take precedence over `.env`.
+Before each `telegram_call_method` request, the server asks clients that support MCP roots for their current workspace root and loads `<workspace-root>/.env`. A project-local token overrides a shared process token, so one persistent MCP server can safely switch between repositories without restarting. Configuration and clients are cached only while the relevant connection settings remain unchanged; edits to `.env` are picked up on the next call.
 
-For local development from the GitHub checkout, run `npm run dev`; the checkout's `.env` is loaded automatically. Never commit a token.
+The workspace must expose exactly one local directory root. Multiple roots return `PROJECT_ROOT_AMBIGUOUS` instead of guessing which bot to use. If the client does not support MCP roots or returns no roots, the server falls back to its startup environment and current working directory for backward compatibility.
+
+For local development from the GitHub checkout, run `npm run dev`. Never commit a token.
 
 ## Tool examples
 
@@ -150,19 +158,19 @@ Descriptors also work inside nested media objects. For fields documented with `a
 
 | Environment variable | Default | Meaning |
 | --- | --- | --- |
-| `TELEGRAM_BOT_TOKEN` | unset | Bot token loaded from the process environment or current project `.env`; required only by `telegram_call_method` |
+| `TELEGRAM_BOT_TOKEN` | unset | Bot token; the active MCP workspace root's `.env` overrides the startup environment |
 | `TELEGRAM_API_BASE_URL` | `https://api.telegram.org` | API origin, including for a local Bot API server |
 | `TELEGRAM_METHOD_ALLOWLIST` | `*` | Comma-separated exact names or `*` glob patterns |
 | `TELEGRAM_REQUEST_TIMEOUT_MS` | `30000` | Per-attempt timeout |
 | `TELEGRAM_REQUEST_RETRIES` | `2` | Retries for transport failures, HTTP 429, and 5xx responses |
 | `TELEGRAM_RATE_LIMIT_PER_SECOND` | `25` | Process-local token refill rate |
 | `TELEGRAM_RATE_LIMIT_BURST` | `30` | Process-local burst capacity |
-| `TELEGRAM_SCHEMA_MAX_AGE_HOURS` | `24` | Startup refresh threshold |
-| `TELEGRAM_SCHEMA_PATH` | bundled `data/telegram-bot-api.json` | Alternate catalog location |
-| `TELEGRAM_LOCAL_FILE_ROOTS` | current directory | Platform-delimited upload root allowlist |
+| `TELEGRAM_SCHEMA_MAX_AGE_HOURS` | `24` | Startup refresh threshold; startup configuration only |
+| `TELEGRAM_SCHEMA_PATH` | bundled `data/telegram-bot-api.json` | Alternate catalog location; startup configuration only |
+| `TELEGRAM_LOCAL_FILE_ROOTS` | active workspace root | Platform-delimited upload root allowlist |
 | `TELEGRAM_MAX_UPLOAD_BYTES` | `52428800` | Per-file memory and local upload limit |
 | `TELEGRAM_ALLOW_UNKNOWN_PARAMETERS` | `false` | Forward-compatibility escape hatch during a stale-schema incident |
-| `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
+| `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error`; startup configuration only |
 
 ## Validation and error behavior
 
@@ -185,7 +193,8 @@ Telegram error codes, descriptions, and response parameters such as `retry_after
 
 ## Security model
 
-- The bot token is read only from the process environment or the current project `.env`. It is never included in tool output or audit fields, and defensive redaction is applied to Telegram descriptions.
+- The bot token is read only from the startup environment or the active MCP workspace root's `.env`. It is never included in tool output or audit fields, and defensive redaction is applied to Telegram descriptions.
+- The server refuses ambiguous multi-root workspaces and non-local roots instead of risking selection of the wrong bot.
 - Audit records are JSON lines on stderr and contain method name, parameter names, timing, retry count, and status—not parameter values.
 - Destructive method families (for example `delete*`, `ban*`, `revoke*`, `refund*`, and `stop*`) require `confirm: true`.
 - `TELEGRAM_METHOD_ALLOWLIST` can limit methods available to the call tool. Prefer a narrow production allowlist.
@@ -218,6 +227,7 @@ Configure npm trusted publishing for this repository and the `publish-npm.yml` w
 src/
   config.ts                process and project-local .env configuration
   index.ts                 stdio entrypoint and startup refresh
+  project-context.ts       MCP roots and per-project Telegram clients
   server.ts                MCP server composition
   telegram-client.ts       HTTP, timeout, retry, error, and audit behavior
   schema-store.ts          validated catalog loading and atomic refresh
