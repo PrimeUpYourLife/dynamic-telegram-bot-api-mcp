@@ -92,8 +92,10 @@ Documentation-only changes do not require a new test, but must still be checked 
 
 ## Git and Local Commits
 
-- Local commits are allowed without additional approval only after `npm run check`, `npm test`, and `npm run build` all pass for the final working tree.
-- Do not create a local commit with failing or skipped required checks. If a check is unavailable, leave the changes uncommitted and report why.
+- Use the connected GitHub MCP server for GitHub operations, including issues, pull requests, workflows, releases, and repository metadata. Do not use the GitHub CLI or direct GitHub API calls when the MCP server supports the operation.
+- Always create a local commit for every completed change. No additional approval is required.
+- When automated tests or validation are required, create the local commit only after all required checks pass for the final working tree. Do not commit with failing or skipped required checks; if a required check is unavailable, leave the changes uncommitted and report why.
+- When no automated test or validation is required, such as for a documentation-only change, still create a local commit after checking the change for correctness and consistency.
 - Stage only files that belong to the requested change. Do not overwrite, discard, or include unrelated worktree changes.
 - Use a concise, imperative commit subject consistent with the repository history, such as `feat: ...`, `fix: ...`, `test: ...`, `docs: ...`, or `chore: ...`.
 - Do not amend, rewrite history, force-push, or push to a remote unless the user explicitly requests it.
