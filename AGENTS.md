@@ -18,7 +18,7 @@ Key locations:
 - `data/telegram-bot-api.json`: generated, checked-in Telegram API catalog.
 - `scripts/refresh-schema.ts`: command-line schema refresh.
 - `test/`: Vitest test suite.
-- `.github/workflows/publish-npm.yml`: validates and publishes matching GitHub releases to npm.
+- `.github/workflows/publish-npm.yml`: manually validates and publishes a matching Git tag to npm.
 
 ## Setup and Commands
 
@@ -35,7 +35,7 @@ npm run build          # Compile TypeScript into dist/
 
 Use `npm install` instead of `npm ci` only when intentionally changing dependencies and the lockfile.
 
-GitHub releases publish to npm only when the release tag matches the version in `package.json`. Keep `package.json` and `package-lock.json` versions synchronized. Configure npm trusted publishing for the `publish-npm.yml` workflow and allow it to run `npm publish`. The workflow intentionally omits `NODE_AUTH_TOKEN` so npm uses GitHub OIDC. If the package does not exist on npm yet, create it with a one-time manual publication using secure npm authentication before configuring trusted publishing.
+Manually dispatch `publish-npm.yml` with a Git tag that matches the version in `package.json`; enable its prerelease option to publish with the `next` npm tag instead of `latest`. Keep `package.json` and `package-lock.json` versions synchronized. Configure npm trusted publishing for the workflow and allow it to run `npm publish`. The workflow intentionally omits `NODE_AUTH_TOKEN` so npm uses GitHub OIDC. If the package does not exist on npm yet, create it with a one-time manual publication using secure npm authentication before configuring trusted publishing.
 
 ## Change Workflow
 
