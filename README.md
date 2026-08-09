@@ -215,32 +215,6 @@ npm run refresh-schema
 
 The daily GitHub Actions workflow refreshes the catalog, tests and builds the project, and commits only when `data/telegram-bot-api.json` changes. Writes are atomic, and concurrent in-process refreshes are coalesced.
 
-## Publishing
-
-Publishing to npm requires manually dispatching `.github/workflows/publish-npm.yml` with a Git tag that matches the package version (for example, `v1.1.0` for version `1.1.0`). The workflow checks that version, runs the type-check, test, and build commands, then publishes to npm with provenance. Leave the prerelease option disabled to use the `latest` npm tag, or enable it to use `next`.
-
-Configure npm trusted publishing for this repository and the `publish-npm.yml` workflow before publishing. Allow the trusted publisher to run `npm publish`; leave its environment name empty because the workflow does not use a GitHub environment. The workflow deliberately omits `NODE_AUTH_TOKEN` so npm uses the short-lived OIDC credential granted by its `id-token: write` permission. If the package does not exist on npm yet, create it with a one-time manual publication using secure npm authentication, then configure trusted publishing for subsequent publications. Update the version in both `package.json` and `package-lock.json` and create the matching Git tag before dispatching the workflow.
-
-## Architecture
-
-```text
-src/
-  config.ts                process and project-local .env configuration
-  index.ts                 stdio entrypoint and startup refresh
-  project-context.ts       MCP roots and per-project Telegram clients
-  server.ts                MCP server composition
-  telegram-client.ts       HTTP, timeout, retry, error, and audit behavior
-  schema-store.ts          validated catalog loading and atomic refresh
-  schema-parser.ts         official-documentation parser
-  validation.ts            recursive runtime validation
-  uploads.ts               safe InputFile and multipart handling
-  tools/                   five stable MCP tool registrations
-data/
-  telegram-bot-api.json    normalized generated catalog
-scripts/
-  refresh-schema.ts        command-line refresh entrypoint
-```
-
 ## Development
 
 ```bash
