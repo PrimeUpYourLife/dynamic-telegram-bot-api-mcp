@@ -213,7 +213,7 @@ Refresh manually with the MCP tool or:
 npm run refresh-schema
 ```
 
-The daily GitHub Actions workflow refreshes the catalog, synchronizes the npm package version with Telegram's Bot API version, then checks, tests, builds, and commits any updates. It creates a GitHub release and dispatches the npm publishing workflow when that version has not been published. Writes are atomic, and concurrent in-process refreshes are coalesced.
+The daily GitHub Actions workflow refreshes the catalog, synchronizes the npm package version with Telegram's Bot API version, then checks, tests, builds, and commits any updates. It creates a GitHub release and dispatches the npm publishing workflow when that version has not been published. Publishing a GitHub release also triggers npm publication directly; prereleases use the `next` npm tag. Writes are atomic, and concurrent in-process refreshes are coalesced.
 
 ## Development
 

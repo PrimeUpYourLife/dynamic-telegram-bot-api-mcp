@@ -1,6 +1,8 @@
 name: Publish npm package
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       release_tag:
@@ -18,7 +20,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: npm-publish-${{ inputs.release_tag }}
+  group: npm-publish-${{ github.event.release.tag_name || inputs.release_tag }}
   cancel-in-progress: false
 
 jobs:
@@ -29,7 +31,7 @@ jobs:
       - name: Check out release tag
         uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.release_tag }}
+          ref: ${{ github.event.release.tag_name || inputs.release_tag }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -42,8 +44,8 @@ jobs:
         id: release
         shell: bash
         env:
-          RELEASE_TAG: ${{ inputs.release_tag }}
-          IS_PRERELEASE: ${{ inputs.prerelease }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+          IS_PRERELEASE: ${{ github.event.release.prerelease || inputs.prerelease }}
         run: |
           package_version="$(node --input-type=commonjs -p "require('./package.json').version")"
           if [[ "$RELEASE_TAG" != "$package_version" && "$RELEASE_TAG" != "v$package_version" ]]; then
