@@ -20,7 +20,8 @@ Key locations:
 - `data/telegram-bot-api.json`: generated, checked-in Telegram API catalog.
 - `scripts/refresh-schema.ts`: command-line schema refresh.
 - `test/`: Vitest test suite.
-- `.github/workflows/publish-npm.yml`: manually validates and publishes a matching Git tag to npm.
+- `.github/workflows/refresh-schema.yml`: refreshes the schema, synchronizes release versions, creates GitHub releases, and dispatches npm publication.
+- `.github/workflows/publish-npm.yml`: validates and publishes a matching Git tag to npm when dispatched manually or by the schema refresh workflow.
 
 ## Setup and Commands
 
@@ -37,7 +38,7 @@ npm run build          # Compile TypeScript into dist/
 
 Use `npm install` instead of `npm ci` only when intentionally changing dependencies and the lockfile.
 
-Manually dispatch `publish-npm.yml` with a Git tag that matches the version in `package.json`; enable its prerelease option to publish with the `next` npm tag instead of `latest`. Keep `package.json` and `package-lock.json` versions synchronized. Configure npm trusted publishing for the workflow and allow it to run `npm publish`. The workflow intentionally omits `NODE_AUTH_TOKEN` so npm uses GitHub OIDC. If the package does not exist on npm yet, create it with a one-time manual publication using secure npm authentication before configuring trusted publishing.
+The scheduled schema refresh maps Telegram Bot API `major.minor` to npm `major.minor.0`, keeps `package.json` and `package-lock.json` synchronized, creates a matching `v<version>` GitHub release, and dispatches `publish-npm.yml` when npm lacks that version. Manual dispatch remains available; enable its prerelease option to publish with the `next` npm tag instead of `latest`. Configure npm trusted publishing for the workflow and allow it to run `npm publish`. The workflow intentionally omits `NODE_AUTH_TOKEN` so npm uses GitHub OIDC. If the package does not exist on npm yet, create it with a one-time manual publication using secure npm authentication before configuring trusted publishing.
 
 ## Change Workflow
 

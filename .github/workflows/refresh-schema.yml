@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
@@ -23,16 +24,56 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run refresh-schema
-      - run: npm test
-      - run: npm run build
-      - name: Commit updated schema
+      - name: Sync package version
+        id: release
         shell: bash
         run: |
-          if git diff --quiet -- data/telegram-bot-api.json; then
-            exit 0
+          schema_version="$(node --input-type=commonjs -p "require('./data/telegram-bot-api.json').version")"
+          if [[ ! "$schema_version" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "Unsupported Telegram Bot API version '$schema_version'." >&2
+            exit 1
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/telegram-bot-api.json
-          git commit -m "chore: refresh Telegram Bot API schema"
-          git push
+
+          IFS=. read -r major minor <<< "$schema_version"
+          package_version="$major.${minor:-0}.0"
+          current_version="$(node --input-type=commonjs -p "require('./package.json').version")"
+          if [[ "$current_version" != "$package_version" ]]; then
+            npm version "$package_version" --no-git-tag-version
+          fi
+
+          echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
+          echo "release_tag=v$package_version" >> "$GITHUB_OUTPUT"
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - name: Commit updates
+        id: commit
+        shell: bash
+        run: |
+          if ! git diff --quiet -- data/telegram-bot-api.json package.json package-lock.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/telegram-bot-api.json package.json package-lock.json
+            git commit -m "chore: refresh Telegram Bot API schema"
+            git push
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.release_tag }}
+          TARGET_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --target "$TARGET_SHA" --title "$RELEASE_TAG" --generate-notes
+          fi
+      - name: Trigger npm publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_VERSION: ${{ steps.release.outputs.package_version }}
+          RELEASE_TAG: ${{ steps.release.outputs.release_tag }}
+        run: |
+          package_name="$(node --input-type=commonjs -p "require('./package.json').name")"
+          if ! npm view "$package_name@$PACKAGE_VERSION" version >/dev/null 2>&1; then
+            gh workflow run publish-npm.yml --ref "${{ github.ref_name }}" -f release_tag="$RELEASE_TAG" -f prerelease=false
+          fi

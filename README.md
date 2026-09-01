@@ -13,7 +13,7 @@
 
 A production-oriented [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes the complete Telegram Bot API through five stable tools. It parses Telegram's official documentation into a normalized local catalog, so new Bot API methods and objects become available after a schema refresh without source-code changes.
 
-The checked-in catalog currently targets Telegram Bot API 10.2 and contains every method and type published in the official documentation.
+The checked-in catalog targets the Telegram Bot API version recorded in `data/telegram-bot-api.json` and contains every method and type published in the official documentation.
 
 ## MCP tools
 
@@ -213,7 +213,7 @@ Refresh manually with the MCP tool or:
 npm run refresh-schema
 ```
 
-The daily GitHub Actions workflow refreshes the catalog, tests and builds the project, and commits only when `data/telegram-bot-api.json` changes. Writes are atomic, and concurrent in-process refreshes are coalesced.
+The daily GitHub Actions workflow refreshes the catalog, synchronizes the npm package version with Telegram's Bot API version, then checks, tests, builds, and commits any updates. It creates a GitHub release and dispatches the npm publishing workflow when that version has not been published. Writes are atomic, and concurrent in-process refreshes are coalesced.
 
 ## Development
 
