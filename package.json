@@ -1,6 +1,6 @@
 {
   "name": "dynamic-telegram-bot-api-mcp",
-  "version": "10.3.3",
+  "version": "10.3.4",
   "mcpName": "io.github.patricktobias86/dynamic-telegram-bot-api-mcp",
   "description": "A dynamic, self-refreshing MCP gateway for the complete Telegram Bot API",
   "repository": {
@@ -39,11 +39,11 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
     "cheerio": "1.2.0",
-    "zod": "4.4.3"
+    "zod": "4.6.1"
   },
   "devDependencies": {
     "@types/node": "26.2.0",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vitest": "^4.1.1"
   }

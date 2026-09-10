@@ -6,12 +6,12 @@
     "url": "https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp",
     "source": "github"
   },
-  "version": "10.3.3",
+  "version": "10.3.4",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "dynamic-telegram-bot-api-mcp",
-      "version": "10.3.3",
+      "version": "10.3.4",
       "transport": {
         "type": "stdio"
       },
