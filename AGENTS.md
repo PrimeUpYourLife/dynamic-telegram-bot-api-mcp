@@ -18,6 +18,7 @@ Key locations:
 - `src/validation.ts`: runtime validation of Telegram method arguments.
 - `src/uploads.ts`: local-file validation and multipart upload handling.
 - `data/telegram-bot-api.json`: generated, checked-in Telegram API catalog.
+- `server.json`: official MCP Registry metadata for the published npm package.
 - `scripts/refresh-schema.ts`: command-line schema refresh.
 - `test/`: Vitest test suite.
 - `.github/workflows/refresh-schema.yml`: refreshes the schema, synchronizes release versions, creates GitHub releases, and dispatches npm publication.

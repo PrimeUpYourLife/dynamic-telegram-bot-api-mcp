@@ -8,6 +8,7 @@
   <a href="https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp/actions/workflows/refresh-schema.yml"><img alt="Refresh Telegram Bot API schema" src="https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp/actions/workflows/refresh-schema.yml/badge.svg" /></a>
   <a href="https://github.com/PrimeUpYourLife/dynamic-telegram-bot-api-mcp/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/PrimeUpYourLife/dynamic-telegram-bot-api-mcp?logo=github" /></a>
   <a href="https://www.npmjs.com/package/dynamic-telegram-bot-api-mcp"><img alt="npm version" src="https://img.shields.io/npm/v/dynamic-telegram-bot-api-mcp?logo=npm" /></a>
+  <a href="https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.patricktobias86%2Fdynamic-telegram-bot-api-mcp"><img alt="MCP Registry" src="https://img.shields.io/badge/MCP_Registry-listed-5A67D8" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/PrimeUpYourLife/dynamic-telegram-bot-api-mcp" /></a>
 </p>
 
@@ -65,6 +66,8 @@ args = ["-y", "dynamic-telegram-bot-api-mcp"]
 ```
 
 Alternatively, install it globally with `npm install -g dynamic-telegram-bot-api-mcp` and use `"command": "telegram-bot-api-mcp"` in the configuration above, omitting `args`.
+
+Registry name: `io.github.patricktobias86/dynamic-telegram-bot-api-mcp`.
 
 ### Install from GitHub
 
