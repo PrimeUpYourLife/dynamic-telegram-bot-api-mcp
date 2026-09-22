@@ -1,6 +1,6 @@
 {
   "name": "dynamic-telegram-bot-api-mcp",
-  "version": "10.3.4",
+  "version": "10.3.0",
   "mcpName": "io.github.patricktobias86/dynamic-telegram-bot-api-mcp",
   "description": "A dynamic, self-refreshing MCP gateway for the complete Telegram Bot API",
   "repository": {
