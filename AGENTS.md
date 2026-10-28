@@ -25,6 +25,7 @@ Key locations:
 - `test/`: Vitest test suite.
 - `.github/workflows/refresh-schema.yml`: refreshes the schema, synchronizes release versions, creates GitHub releases, and dispatches npm publication.
 - `.github/workflows/publish-npm.yml`: validates and publishes a matching Git tag to npm when a GitHub release is published, or when dispatched manually or by the schema refresh workflow.
+- `.github/workflows/source-checks.yml`: read-only PR validation on the approved Linux runner; no catalog refresh, bot credentials or publication.
 
 ## Setup and Commands
 

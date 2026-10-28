@@ -237,4 +237,8 @@ The parser has minimum method/type count guards to prevent a changed or partial 
 
 ## License
 
+Pull requests have a read-only `source-checks.yml` workflow for the approved
+Linux runner. It checks the lockfile, types, full test suite, build and audit.
+It never refreshes the live catalog, publishes a package or uses a bot token.
+
 [MIT](LICENSE)
