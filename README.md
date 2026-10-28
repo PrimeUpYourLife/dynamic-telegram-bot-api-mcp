@@ -220,6 +220,10 @@ The daily GitHub Actions workflow refreshes the catalog, synchronizes the npm pa
 
 ## Development
 
+MCP initialization reports the installed npm package version. Startup diagnostics distinguish `packageVersion` from `telegramBotApiVersion`; API catalog refreshes preserve package patch releases. `node scripts/sync-version.mjs` synchronizes package, lockfile, and MCP Registry versions without downgrading a published patch.
+
+The five-tool interface uses MCP JSON Schema, structured results and a JSON text fallback for Codex, Claude and other local clients. Hosted clients such as ChatGPT and Grok require a separately authenticated remote MCP adapter. The local server's bot token must remain scoped to its workspace; MCP annotations are selection hints, not authorization.
+
 ```bash
 npm run check
 npm test

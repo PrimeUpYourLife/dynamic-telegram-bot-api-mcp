@@ -12,6 +12,8 @@ Key locations:
 - `src/index.ts`: stdio entrypoint and startup schema refresh.
 - `src/project-context.ts`: MCP roots resolution, per-project configuration precedence, and Telegram client caching.
 - `src/server.ts`: MCP server composition and tool registration.
+- `src/version.ts`: installed package identity used by MCP initialization and startup diagnostics.
+- `scripts/sync-version.mjs`: preserve package patch releases while synchronizing package, lockfile and registry versions; use this script for scheduled catalog version changes.
 - `src/tools/`: implementations of the five public MCP tools.
 - `src/telegram-client.ts`: Telegram HTTP calls, retries, errors, auditing, and `ArrayBuffer`-backed multipart file construction.
 - `src/schema-parser.ts`, `src/schema-store.ts`, and `src/schema.ts`: schema parsing, validation, persistence, and types.
@@ -39,7 +41,7 @@ npm run build          # Compile TypeScript into dist/
 
 Use `npm install` instead of `npm ci` only when intentionally changing dependencies and the lockfile.
 
-The scheduled schema refresh maps Telegram Bot API `major.minor` to npm `major.minor.0`, keeps `package.json` and `package-lock.json` synchronized, creates a matching `v<version>` GitHub release, and dispatches `publish-npm.yml` when npm lacks that version. Every published GitHub release also triggers `publish-npm.yml`; prereleases publish with the `next` npm tag. Manual dispatch remains available with the same prerelease option. Configure npm trusted publishing for the workflow and allow it to run `npm publish`. The workflow intentionally omits `NODE_AUTH_TOKEN` so npm uses GitHub OIDC. If the package does not exist on npm yet, create it with a one-time manual publication using secure npm authentication before configuring trusted publishing.
+The scheduled schema refresh uses `scripts/sync-version.mjs`: a newer Telegram Bot API `major.minor` advances npm to `major.minor.0`; equal or older catalogs preserve the current package patch. Package, lockfile and registry versions stay aligned. It creates a matching `v<version>` GitHub release and dispatches `publish-npm.yml` when npm lacks that version. Every published GitHub release also triggers publication; prereleases use the `next` npm tag. Configure npm trusted publishing for the workflow. It omits `NODE_AUTH_TOKEN` so npm uses GitHub OIDC. A first publication requires secure npm authentication before trusted publishing can be configured.
 
 ## Change Workflow
 

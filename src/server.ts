@@ -5,9 +5,10 @@ import { registerGetMethod } from "./tools/get-method.js";
 import { registerGetType } from "./tools/get-type.js";
 import { registerRefreshSchema } from "./tools/refresh-schema.js";
 import { registerSearchMethods } from "./tools/search-methods.js";
+import { packageVersion } from "./version.js";
 
 export function createServer(context: ToolContext): McpServer {
-  const server = new McpServer({ name: "dynamic-telegram-bot-api-mcp", version: "1.0.0" });
+  const server = new McpServer({ name: "dynamic-telegram-bot-api-mcp", version: packageVersion });
   registerSearchMethods(server, context);
   registerGetMethod(server, context);
   registerGetType(server, context);
