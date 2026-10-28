@@ -6,6 +6,7 @@ import { ProjectContextResolver } from "./project-context.js";
 import { SchemaStore, defaultSchemaPath } from "./schema-store.js";
 import { createServer } from "./server.js";
 import type { ToolContext } from "./tools/context.js";
+import { packageVersion } from "./version.js";
 
 async function main(): Promise<void> {
   const config = loadConfig();
@@ -27,7 +28,7 @@ async function main(): Promise<void> {
   context.resolveProjectContext = () => projectContextResolver.resolve();
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  logger.info("mcp_server_started", { transport: "stdio", schemaVersion: initialized.schema.version });
+  logger.info("mcp_server_started", { transport: "stdio", packageVersion, telegramBotApiVersion: initialized.schema.version, schemaVersion: initialized.schema.version });
 }
 
 main().catch((error: unknown) => {

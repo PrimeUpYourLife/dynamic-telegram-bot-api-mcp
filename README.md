@@ -220,6 +220,13 @@ The daily GitHub Actions workflow refreshes the catalog, synchronizes the npm pa
 
 ## Development
 
+Runtime SDK and schema validation dependencies are pinned to patched versions.
+Run `npm audit` alongside the required checks when changing dependency versions.
+
+MCP initialization reports the installed npm package version. Startup diagnostics distinguish `packageVersion` from `telegramBotApiVersion`; API catalog refreshes preserve package patch releases. `node scripts/sync-version.mjs` synchronizes package, lockfile, and MCP Registry versions without downgrading a published patch.
+
+The five-tool interface uses MCP JSON Schema, structured results and a JSON text fallback for Codex, Claude and other local clients. Hosted clients such as ChatGPT and Grok require a separately authenticated remote MCP adapter. The local server's bot token must remain scoped to its workspace; MCP annotations are selection hints, not authorization.
+
 ```bash
 npm run check
 npm test
@@ -229,5 +236,9 @@ npm run build
 The parser has minimum method/type count guards to prevent a changed or partial documentation page from replacing a good catalog. When Telegram changes the HTML presentation rather than merely adding API entries, update the parser and its fixture test.
 
 ## License
+
+Pull requests have a read-only `source-checks.yml` workflow for the approved
+Linux runner. It checks the lockfile, types, full test suite, build and audit.
+It never refreshes the live catalog, publishes a package or uses a bot token.
 
 [MIT](LICENSE)

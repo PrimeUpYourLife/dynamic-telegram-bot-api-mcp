@@ -28,18 +28,7 @@ jobs:
         id: release
         shell: bash
         run: |
-          schema_version="$(node --input-type=commonjs -p "require('./data/telegram-bot-api.json').version")"
-          if [[ ! "$schema_version" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-            echo "Unsupported Telegram Bot API version '$schema_version'." >&2
-            exit 1
-          fi
-
-          IFS=. read -r major minor <<< "$schema_version"
-          package_version="$major.${minor:-0}.0"
-          current_version="$(node --input-type=commonjs -p "require('./package.json').version")"
-          if [[ "$current_version" != "$package_version" ]]; then
-            npm version "$package_version" --no-git-tag-version
-          fi
+          package_version="$(node scripts/sync-version.mjs)"
 
           echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
           echo "release_tag=v$package_version" >> "$GITHUB_OUTPUT"
@@ -50,10 +39,10 @@ jobs:
         id: commit
         shell: bash
         run: |
-          if ! git diff --quiet -- data/telegram-bot-api.json package.json package-lock.json; then
+          if ! git diff --quiet -- data/telegram-bot-api.json package.json package-lock.json server.json; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data/telegram-bot-api.json package.json package-lock.json
+            git add data/telegram-bot-api.json package.json package-lock.json server.json
             git commit -m "chore: refresh Telegram Bot API schema"
             git push
           fi
